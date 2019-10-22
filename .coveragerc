@@ -1,0 +1,6 @@
+[report]
+include =
+    src/bws/*
+omit =
+    */test*
+    */upgrades/*
