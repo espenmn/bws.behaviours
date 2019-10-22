@@ -10,6 +10,29 @@ from zope.interface import Interface
 from zope.interface import implementer
 from zope.interface import provider
 
+#Needed for the datagrid fields
+from plone.autoform.directives import widget
+
+#DataGridStuff
+from collective.z3cform.datagridfield import DataGridFieldFactory
+from collective.z3cform.datagridfield import DictRow
+
+class ITableColumns(Interface):
+    """ Fields to be used with DataGridField below
+    """
+
+    label = schema.TextLine(
+        title=_(u'Label'),
+        description=_(u'Label Name'),
+        required=False,
+    )
+
+    information = schema.TextLine(
+        title=_(u'Info'),
+        description=_(u'Information'),
+        required=False,
+    )
+
 
 class ISimpleNoteTableMarker(Interface):
     pass
@@ -19,12 +42,15 @@ class ISimpleNoteTable(model.Schema):
     """
     """
 
-    project = schema.TextLine(
-        title=_(u'Project'),
-        description=_(u'Give in a project name'),
+    widget(simple_group=DataGridFieldFactory)
+    simple_group = schema.List(title=u"Table fields",
+        value_type=DictRow(title=u"Note Table Fields", schema=ITableColumns),
         required=False,
     )
 
+
+# Note        
+# It might not be possible to use setter with all type of (datagrid) fields
 
 @implementer(ISimpleNoteTable)
 @adapter(ISimpleNoteTableMarker)
@@ -33,11 +59,13 @@ class SimpleNoteTable(object):
         self.context = context
 
     @property
-    def project(self):
-        if hasattr(self.context, 'project'):
-            return self.context.project
+    def simple_group(self):
+        if hasattr(self.context, 'simple_group'):
+            return self.context.simple_group
         return None
 
-    @project.setter
-    def project(self, value):
-        self.context.project = value
+    @simple_group.setter
+    def simple_group(self, value):
+        self.context.simple_group = value
+        
+
